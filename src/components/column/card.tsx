@@ -222,6 +222,32 @@ function ExtraInfo({ item }: { item: NewsItem }) {
   }
 }
 
+function HoverSummary({ item }: { item: NewsItem }) {
+  const summary = item.extra?.hover
+    ?.replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+
+  if (!summary || summary === item.title.trim()) return null
+
+  return (
+    <span
+      className="block mt-1 text-sm text-neutral-500/90 dark:text-neutral-400/90"
+      style={{
+        display: "-webkit-box",
+        WebkitBoxOrient: "vertical",
+        WebkitLineClamp: 3,
+        lineHeight: 1.35,
+        maxHeight: "4.05em",
+        overflow: "hidden",
+      }}
+      title={summary}
+    >
+      {summary}
+    </span>
+  )
+}
+
 function NewsUpdatedTime({ date }: { date: string | number }) {
   const relativeTime = useRelativeTime(date)
   return <>{relativeTime}</>
@@ -245,13 +271,14 @@ function NewsListHot({ items }: { items: NewsItem[] }) {
             {i + 1}
           </span>
           {!!item.extra?.diff && <DiffNumber diff={item.extra.diff} />}
-          <span className="self-start line-height-none">
+          <span className="self-start line-height-none min-w-0 flex-1">
             <span className="mr-2 text-base">
               {item.title}
             </span>
             <span className="text-xs text-neutral-400/80 truncate align-middle">
               <ExtraInfo item={item} />
             </span>
+            <HoverSummary item={item} />
           </span>
         </a>
       ))}
@@ -285,6 +312,7 @@ function NewsListTimeLine({ items }: { items: NewsItem[] }) {
             rel="noopener noreferrer"
           >
             {item.title}
+            <HoverSummary item={item} />
           </a>
         </li>
       ))}
