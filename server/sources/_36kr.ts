@@ -1,6 +1,14 @@
 import type { NewsItem } from "@shared/types"
 import { load } from "cheerio"
 import dayjs from "dayjs/esm"
+import { withPageDescriptions } from "#/utils/summary"
+
+async function with36KrDescriptions(items: NewsItem[]) {
+  const enriched = await withPageDescriptions(items)
+  return enriched.map(item => item.extra?.hover?.trim() && item.extra.hover.trim() !== item.title.trim()
+    ? item
+    : { ...item, extra: { ...item.extra, hover: "36氪快讯" } })
+}
 
 const quick = defineSource(async () => {
   const baseURL = "https://www.36kr.com"
@@ -27,7 +35,7 @@ const quick = defineSource(async () => {
     }
   })
 
-  return news
+  return with36KrDescriptions(news)
 })
 
 const renqi = defineSource(async () => {
@@ -79,7 +87,7 @@ const renqi = defineSource(async () => {
       })
     }
   })
-  return articles.length ? articles : quick()
+  return articles.length ? with36KrDescriptions(articles) : quick()
 })
 
 export default defineSource({

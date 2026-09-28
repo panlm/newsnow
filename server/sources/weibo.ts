@@ -1,53 +1,41 @@
-import * as cheerio from "cheerio"
+interface Res {
+  data: {
+    realtime: {
+      word: string
+      num: number
+      flag_desc?: string
+      label_name?: string
+      icon?: string
+      is_ad?: number
+    }[]
+  }
+}
 
 export default defineSource(async () => {
   const baseurl = "https://s.weibo.com"
-  const url = `${baseurl}/top/summary?cate=realtimehot`
-
-  const html = await myFetch(url, {
+  const res: Res = await myFetch("https://weibo.com/ajax/side/hotSearch", {
     headers: {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-      // https://github.com/v5tech/weibo-trending-hot-search
-      "Cookie": "SUB=_2AkMWIuNSf8NxqwJRmP8dy2rhaoV2ygrEieKgfhKJJRMxHRl-yT9jqk86tRB6PaLNvQZR6zYUcYVT1zSjoSreQHidcUq7",
-      "referer": url,
+      Referer: "https://weibo.com/",
     },
   })
 
-  const $ = cheerio.load(html)
-
-  const rows = $("#pl_top_realtimehot table tbody tr").slice(1)
-
-  const hotNews: NewsItem[] = []
-
-  rows.each((_, row) => {
-    const $row = $(row)
-    const $link = $row.find("td.td-02 a").filter((_, el) => {
-      const href = $(el).attr("href")
-      return !!(href && !href.includes("javascript:void(0);"))
-    }).first()
-
-    if ($link.length) {
-      const title = $link.text().trim()
-      const href = $link.attr("href")
-
-      if (title && href) {
-        const $flag = $row.find("td.td-03").text().trim()
-        const flagUrl = {
-          新: "https://simg.s.weibo.com/moter/flags/1_0.png",
-          热: "https://simg.s.weibo.com/moter/flags/2_0.png",
-          爆: "https://simg.s.weibo.com/moter/flags/4_0.png",
-        }[$flag]
-        hotNews.push({
-          id: title,
-          title,
-          url: `${baseurl}${href}`,
-          mobileUrl: `${baseurl}${href}`,
-          extra: {
-            icon: flagUrl ? { url: flagUrl, scale: 1.5 } : undefined,
-          },
-        })
+  return res.data.realtime
+    .filter(item => !item.is_ad)
+    .slice(0, 30)
+    .map((item) => {
+      const title = item.word.trim()
+      const url = `${baseurl}/weibo?q=${encodeURIComponent(title)}&Refer=top`
+      return {
+        id: title,
+        title,
+        url,
+        mobileUrl: url,
+        extra: {
+          icon: item.icon ? { url: item.icon, scale: 1.5 } : undefined,
+          hover: [`热度 ${item.num}`, item.flag_desc || item.label_name]
+            .filter(Boolean)
+            .join(" · "),
+        },
       }
-    }
-  })
-  return hotNews
+    })
 })

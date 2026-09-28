@@ -1,4 +1,5 @@
 import type { NewsItem } from "@shared/types"
+import { withPageDescriptions } from "#/utils/summary"
 
 export default defineSource(async () => {
   const html: string = await myFetch("https://www.ifeng.com/")
@@ -23,5 +24,8 @@ export default defineSource(async () => {
       })
     })
   }
-  return news
+  const enriched = await withPageDescriptions(news)
+  return enriched.map(item => item.extra?.hover?.trim() && item.extra.hover.trim() !== item.title.trim()
+    ? item
+    : { ...item, extra: { ...item.extra, hover: "凤凰网资讯" } })
 })

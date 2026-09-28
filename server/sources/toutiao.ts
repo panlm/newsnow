@@ -3,6 +3,8 @@ interface Res {
     ClusterIdStr: string
     Title: string
     HotValue: string
+    LabelDesc?: string
+    InterestCategory?: string[]
     Image: {
       url: string
     }
@@ -23,6 +25,9 @@ export default defineSource(async () => {
         url: `https://www.toutiao.com/trending/${k.ClusterIdStr}/`,
         extra: {
           icon: k.LabelUri?.url,
+          hover: [k.LabelDesc, `热度 ${k.HotValue}`, k.InterestCategory?.join(" / ")]
+            .filter(Boolean)
+            .join(" · "),
         },
       }
     })

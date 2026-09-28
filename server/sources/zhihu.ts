@@ -45,7 +45,7 @@ export default defineSource({
           title: k.target.title_area.text,
           extra: {
             info: k.target.metrics_area.text,
-            hover: k.target.excerpt_area.text,
+            hover: k.target.excerpt_area.text || k.target.metrics_area.text,
           },
           url: k.target.link.url,
         }

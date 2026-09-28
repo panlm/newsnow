@@ -1,4 +1,13 @@
+import type { NewsItem } from "@shared/types"
 import { getSearchParams } from "./utils"
+import { withPageDescriptions } from "#/utils/summary"
+
+async function withClsDescriptions(items: NewsItem[]) {
+  const enriched = await withPageDescriptions(items)
+  return enriched.map(item => item.extra?.hover?.trim() && item.extra.hover.trim() !== item.title.trim()
+    ? item
+    : { ...item, extra: { ...item.extra, hover: "财联社资讯" } })
+}
 
 interface Item {
   id: number
@@ -31,31 +40,43 @@ const depth = defineSource(async () => {
   const apiUrl = `https://www.cls.cn/v3/depth/home/assembled/1000`
   const res: Depthes = await myFetch(apiUrl, {
     query: Object.fromEntries(await getSearchParams()),
+    timeout: 30000,
+    retry: 1,
   })
-  return res.data.depth_list.sort((m, n) => n.ctime - m.ctime).map((k) => {
+  const items = res.data.depth_list.sort((m, n) => n.ctime - m.ctime).map((k) => {
     return {
       id: k.id,
       title: k.title || k.brief,
+      extra: {
+        hover: k.brief,
+      },
       mobileUrl: k.shareurl,
       pubDate: k.ctime * 1000,
       url: `https://www.cls.cn/detail/${k.id}`,
     }
   })
+  return withClsDescriptions(items)
 })
 
 const hot = defineSource(async () => {
   const apiUrl = `https://www.cls.cn/v2/article/hot/list`
   const res: Hot = await myFetch(apiUrl, {
     query: Object.fromEntries(await getSearchParams()),
+    timeout: 30000,
+    retry: 1,
   })
-  return res.data.map((k) => {
+  const items = res.data.map((k) => {
     return {
       id: k.id,
       title: k.title || k.brief,
+      extra: {
+        hover: k.brief,
+      },
       mobileUrl: k.shareurl,
       url: `https://www.cls.cn/detail/${k.id}`,
     }
   })
+  return withClsDescriptions(items)
 })
 
 const telegraph = defineSource(async () => {
@@ -66,19 +87,25 @@ const telegraph = defineSource(async () => {
       refresh_type: 1,
       rn: 30,
     })),
+    timeout: 30000,
+    retry: 1,
     headers: {
       Referer: "https://www.cls.cn/telegraph",
     },
   })
-  return res.data.roll_data.filter(k => !k.is_ad).map((k) => {
+  const items = res.data.roll_data.filter(k => !k.is_ad).map((k) => {
     return {
       id: k.id,
       title: k.title || k.brief,
+      extra: {
+        hover: k.brief,
+      },
       mobileUrl: k.shareurl,
       pubDate: k.ctime * 1000,
       url: `https://www.cls.cn/detail/${k.id}`,
     }
   })
+  return withClsDescriptions(items)
 })
 
 export default defineSource({
