@@ -236,9 +236,9 @@ function HoverSummary({ item }: { item: NewsItem }) {
       style={{
         display: "-webkit-box",
         WebkitBoxOrient: "vertical",
-        WebkitLineClamp: 8,
+        WebkitLineClamp: 20,
         lineHeight: 1.35,
-        maxHeight: "10.8em",
+        maxHeight: "27em",
         overflow: "hidden",
       }}
       title={summary}
