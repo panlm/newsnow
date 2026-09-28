@@ -268,6 +268,39 @@ export const originSources = {
     home: "https://solidot.org",
     interval: Time.Slow,
   },
+  "arxiv": {
+    name: "arXiv",
+    title: "AI 最新论文",
+    color: "red",
+    column: "tech",
+    type: "realtime",
+    interval: Time.Slow,
+    home: "https://arxiv.org/",
+  },
+  "huggingface": {
+    name: "Hugging Face",
+    color: "yellow",
+    column: "tech",
+    home: "https://huggingface.co/",
+    interval: Time.Common,
+    sub: {
+      papers: {
+        title: "Daily Papers",
+        type: "hottest",
+        home: "https://huggingface.co/papers",
+      },
+      models: {
+        title: "热门模型",
+        type: "hottest",
+        home: "https://huggingface.co/models?sort=trending",
+      },
+      datasets: {
+        title: "热门数据集",
+        type: "hottest",
+        home: "https://huggingface.co/datasets?sort=trending",
+      },
+    },
+  },
   "hackernews": {
     name: "Hacker News",
     color: "orange",

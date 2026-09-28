@@ -334,6 +334,52 @@
     "color": "teal",
     "interval": 3600000
   },
+  "arxiv": {
+    "title": "AI 最新论文",
+    "name": "arXiv",
+    "type": "realtime",
+    "column": "tech",
+    "home": "https://arxiv.org/",
+    "color": "red",
+    "interval": 3600000
+  },
+  "huggingface": {
+    "redirect": "huggingface-papers",
+    "name": "Hugging Face",
+    "type": "hottest",
+    "column": "tech",
+    "home": "https://huggingface.co/papers",
+    "color": "yellow",
+    "interval": 1800000,
+    "title": "Daily Papers"
+  },
+  "huggingface-papers": {
+    "name": "Hugging Face",
+    "type": "hottest",
+    "column": "tech",
+    "home": "https://huggingface.co/papers",
+    "color": "yellow",
+    "interval": 1800000,
+    "title": "Daily Papers"
+  },
+  "huggingface-models": {
+    "name": "Hugging Face",
+    "type": "hottest",
+    "column": "tech",
+    "home": "https://huggingface.co/models?sort=trending",
+    "color": "yellow",
+    "interval": 1800000,
+    "title": "热门模型"
+  },
+  "huggingface-datasets": {
+    "name": "Hugging Face",
+    "type": "hottest",
+    "column": "tech",
+    "home": "https://huggingface.co/datasets?sort=trending",
+    "color": "yellow",
+    "interval": 1800000,
+    "title": "热门数据集"
+  },
   "hackernews": {
     "name": "Hacker News",
     "type": "hottest",
