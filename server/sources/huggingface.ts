@@ -1,4 +1,5 @@
 import type { NewsItem } from "@shared/types"
+import { withTranslatedHover } from "#/utils/translate"
 
 interface HFAuthor {
   name?: string
@@ -57,7 +58,7 @@ function repoHover(repo: HFRepo) {
 
 const papers = defineSource(async () => {
   const data = await myFetch<HFDailyPaper[]>("https://huggingface.co/api/daily_papers?limit=30", requestOptions)
-  return data.map<NewsItem>((entry) => {
+  const items = data.map<NewsItem>((entry) => {
     const paper = entry.paper
     const authorCount = paper.authors?.length ?? 0
     return {
@@ -71,11 +72,12 @@ const papers = defineSource(async () => {
       },
     }
   }).filter(item => item.id && item.title && item.extra?.hover)
+  return withTranslatedHover(items)
 })
 
 const models = defineSource(async () => {
   const data = await myFetch<HFRepo[]>("https://huggingface.co/api/models?sort=trendingScore&direction=-1&limit=30", requestOptions)
-  return data.map<NewsItem>(repo => ({
+  const items = data.map<NewsItem>(repo => ({
     id: repo.id,
     title: repo.modelId || repo.id,
     url: `https://huggingface.co/${repo.id}`,
@@ -85,11 +87,12 @@ const models = defineSource(async () => {
       hover: repoHover(repo),
     },
   })).filter(item => item.id && item.title && item.extra?.hover)
+  return withTranslatedHover(items)
 })
 
 const datasets = defineSource(async () => {
   const data = await myFetch<HFRepo[]>("https://huggingface.co/api/datasets?sort=trendingScore&direction=-1&limit=30", requestOptions)
-  return data.map<NewsItem>(repo => ({
+  const items = data.map<NewsItem>(repo => ({
     id: repo.id,
     title: repo.id,
     url: `https://huggingface.co/datasets/${repo.id}`,
@@ -99,6 +102,7 @@ const datasets = defineSource(async () => {
       hover: repoHover(repo),
     },
   })).filter(item => item.id && item.title && item.extra?.hover)
+  return withTranslatedHover(items)
 })
 
 export default defineSource({

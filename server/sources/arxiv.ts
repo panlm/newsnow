@@ -1,5 +1,6 @@
 import { XMLParser } from "fast-xml-parser"
 import type { NewsItem } from "@shared/types"
+import { withTranslatedHover } from "#/utils/translate"
 
 interface ArxivAuthor {
   name?: string
@@ -46,7 +47,7 @@ export default defineSource(async () => {
   }).parse(xmlText)
   const entries = asArray<ArxivEntry>(xml?.feed?.entry)
 
-  return entries.map<NewsItem>((entry) => {
+  const items = entries.map<NewsItem>((entry) => {
     const id = cleanText(entry.id).split("/abs/").pop() ?? ""
     const authors = asArray(entry.author).map(author => cleanText(author.name)).filter(Boolean)
     const categories = asArray(entry.category).map(category => category.term).filter(Boolean)
@@ -62,4 +63,5 @@ export default defineSource(async () => {
       },
     }
   }).filter(item => item.id && item.title && item.extra?.hover)
+  return withTranslatedHover(items)
 })
