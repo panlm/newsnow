@@ -6,14 +6,25 @@ import { isIP } from "node:net"
 import type { LookupFunction } from "node:net"
 import type { NewsItem } from "@shared/types"
 import * as cheerio from "cheerio"
+import { summarizeArticle } from "#/utils/llm"
 
 const MAX_RESPONSE_BYTES = 512 * 1024
-const PAGE_TIMEOUT_MS = 6000
-const MAX_REDIRECTS = 2
+const PAGE_TIMEOUT_MS = 8000
+const MAX_REDIRECTS = 3
+const ARTICLE_USER_AGENT
+  = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+const MIN_ARTICLE_CHARS = 400
+const MAX_ARTICLE_CHARS = 8000
+// `.comtr`/`.commtext` are Hacker News comment rows: Ask HN and Show HN posts
+// link back to the item page, where the comment tree would drown the post text.
+const BOILERPLATE_SELECTORS = "script, style, noscript, template, svg, iframe, nav, header, footer, aside, form, button, figure figcaption, .nav, .menu, .sidebar, .comment, .comments, .comtr, .commtext, .comhead, .advertisement, .ad, .cookie, .newsletter, .related, .share, .social"
+const ARTICLE_SELECTORS = ["article", "main", "[role='main']", ".post-content", ".entry-content", ".article-body", ".post-body", "#content", ".content"]
 
 interface PageDescriptionOptions {
   concurrency?: number
   maxFetches?: number
+  /** Summarize the article body with an LLM instead of reusing its meta description. */
+  llm?: boolean
 }
 
 function isPublicIPv4(address: string) {
@@ -87,7 +98,18 @@ async function resolvePublicTarget(url: URL) {
 async function fetchPublicHtml(input: string, redirects = 0): Promise<string> {
   const url = new URL(input)
   const target = await resolvePublicTarget(url)
-  const pinnedLookup: LookupFunction = (_hostname, _options, callback) => {
+  // Node >= 20 enables autoSelectFamily, which calls the custom lookup with
+  // `all: true` and expects an array. Answering with the single-address shape
+  // makes the agent read `addresses[0].address` off a string, so every request
+  // dies with "Invalid IP address: undefined".
+  const pinnedLookup: LookupFunction = (_hostname, options, callback) => {
+    if ((options as { all?: boolean })?.all) {
+      (callback as unknown as (err: null, addresses: { address: string, family: number }[]) => void)(
+        null,
+        [{ address: target.address, family: target.family }],
+      )
+      return
+    }
     callback(null, target.address, target.family)
   }
   const request = url.protocol === "https:" ? httpsRequest : httpRequest
@@ -95,8 +117,12 @@ async function fetchPublicHtml(input: string, redirects = 0): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const req = request(url, {
       headers: {
-        "Accept": "text/html,application/xhtml+xml",
-        "User-Agent": "NewsNow/1.0 (+https://github.com/newsnext/newsnow)",
+        // A plain bot UA gets 403'd by a large slice of publishers (openai.com,
+        // america.gov, most Cloudflare-fronted sites), which silently costs the
+        // hover summary. Present as a normal browser instead.
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent": ARTICLE_USER_AGENT,
       },
       lookup: pinnedLookup,
       method: "GET",
@@ -147,19 +173,51 @@ async function fetchPublicHtml(input: string, redirects = 0): Promise<string> {
   })
 }
 
-async function addPageDescription(item: NewsItem): Promise<NewsItem> {
+function extractMetaDescription($: cheerio.CheerioAPI) {
+  const candidates = [
+    $("meta[name='description']").attr("content"),
+    $("meta[property='og:description']").attr("content"),
+    $("meta[name='twitter:description']").attr("content"),
+  ]
+  return candidates.find(value => value?.trim())?.trim()
+}
+
+/** Best-effort main-article text, good enough to summarize but not to render. */
+function extractArticleText($: cheerio.CheerioAPI) {
+  $(BOILERPLATE_SELECTORS).remove()
+  const root = ARTICLE_SELECTORS
+    .map(selector => $(selector).first())
+    .find(node => node.length > 0 && node.text().replace(/\s+/g, " ").trim().length >= MIN_ARTICLE_CHARS)
+    ?? $("body")
+  const text = (root?.length ? root : $("body"))
+    .text()
+    .replace(/[\t\f\v ]+/g, " ")
+    .replace(/\s*\n\s*/g, "\n")
+    .replace(/\n{2,}/g, "\n")
+    .replace(/ {2,}/g, " ")
+    .trim()
+  return text.slice(0, MAX_ARTICLE_CHARS)
+}
+
+async function addPageDescription(item: NewsItem, options: PageDescriptionOptions): Promise<NewsItem> {
   try {
     const html = await fetchPublicHtml(item.url)
     const $ = cheerio.load(html)
-    const hover = $("meta[name='description']").attr("content")
-      || $("meta[property='og:description']").attr("content")
+    const description = extractMetaDescription($)
+    // Read the body before cheerio strips boilerplate, so the meta description
+    // stays available as the fallback when summarization is off or fails.
+    const articleText = options.llm ? extractArticleText($) : ""
+    const summary = options.llm && articleText.length >= MIN_ARTICLE_CHARS
+      ? await summarizeArticle({ url: item.url, title: item.title, text: articleText })
+      : undefined
+    const hover = summary ?? description
 
-    if (!hover?.trim()) return item
+    if (!hover) return item
     return {
       ...item,
       extra: {
         ...item.extra,
-        hover: hover.trim(),
+        hover,
       },
     }
   } catch {
@@ -187,7 +245,7 @@ export async function withPageDescriptions(
   await Promise.all(Array.from({ length: Math.min(concurrency, candidates.length) }, async () => {
     while (cursor < candidates.length) {
       const candidate = candidates[cursor++]
-      result[candidate.index] = await addPageDescription(candidate.item)
+      result[candidate.index] = await addPageDescription(candidate.item, options)
     }
   }))
   return result

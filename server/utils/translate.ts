@@ -46,8 +46,58 @@ function normalizeText(text: string) {
     : shortened
 }
 
-function polishTranslation(text: string, source: string) {
+/**
+ * Amazon Translate renders "Amazon Bedrock" as 亚马逊基岩 and "Amazon Web Services"
+ * as 亚马逊网络服务. Custom terminology cannot fix it: an en->en entry is never
+ * reported in AppliedTerminologies and never applied, so product names have to
+ * be repaired after the fact. Each rule only fires when the English source
+ * actually mentions the product.
+ */
+const PRODUCT_NAME_FIXES: [RegExp, RegExp, string][] = [
+  [/\bAmazon Web Services\b|\bAWS\b/i, /亚马逊网络服务|亚马逊\s?Web\s?服务|亚马逊云科技/g, "AWS"],
+  [/\bAmazon Bedrock\b/i, /亚马逊基岩|亚马逊\s?Bedrock/g, "Amazon Bedrock"],
+  [/\bBedrock\b/, /基岩/g, "Bedrock"],
+  [/\bAmazon Redshift\b/i, /亚马逊红移/g, "Amazon Redshift"],
+  [/\bRedshift\b/, /红移/g, "Redshift"],
+  [/\bAmazon Athena\b/i, /亚马逊雅典娜/g, "Amazon Athena"],
+  [/\bAmazon Aurora\b/i, /亚马逊极光/g, "Amazon Aurora"],
+  [/\bAmazon DynamoDB\b/i, /亚马逊发电机/g, "Amazon DynamoDB"],
+  [/\bAmazon CloudWatch\b/i, /亚马逊云观察|亚马逊云手表/g, "Amazon CloudWatch"],
+  [/\bAmazon CloudFront\b/i, /亚马逊云锋/g, "Amazon CloudFront"],
+  [/\bAmazon Connect\b/i, /亚马逊连接/g, "Amazon Connect"],
+  [/\bAmazon Nova\b/i, /亚马逊新星/g, "Amazon Nova"],
+  [/\bAmazon Titan\b/i, /亚马逊泰坦/g, "Amazon Titan"],
+  [/\bAmazon Inspector\b/i, /亚马逊检查员/g, "Amazon Inspector"],
+  [/\bAmazon Outposts\b/i, /亚马逊前哨/g, "Amazon Outposts"],
+  [/\bAmazon Location Service\b/i, /亚马逊定位服务/g, "Amazon Location Service"],
+  [/\bAmazon Sustainability Data Initiative\b/i, /亚马逊可持续发展数据倡议/g, "Amazon Sustainability Data Initiative"],
+  [/\bAWS Glue\b/i, /AWS\s?胶水/g, "AWS Glue"],
+  [/\bAWS Fargate\b/i, /AWS\s?法盖特/g, "AWS Fargate"],
+  [/\bStep Functions\b/i, /阶跃函数|步进函数/g, "Step Functions"],
+]
+
+function polishProductNames(text: string, source: string) {
   let result = text
+  for (const [sourceGuard, pattern, replacement] of PRODUCT_NAME_FIXES) {
+    if (sourceGuard.test(source)) result = result.replace(pattern, replacement)
+  }
+  // Catch the long tail: any "Amazon <Name>" the engine turned into "亚马逊 <Name>".
+  if (/\bAmazon [A-Z]/.test(source)) {
+    result = result
+      .replace(/亚马逊\s*(?=[A-Za-z])/g, "Amazon ")
+      .replace(/Amazon {2,}/g, "Amazon ")
+  }
+  // The engine likes to emit its own Chinese rendering followed by the English
+  // product name in parentheses ("亚马逊简单存储服务（Amazon S3）"), and the AWS rule
+  // above turns "Amazon Web Services (AWS)" into "AWS (AWS)". Drop the redundant half.
+  return result
+    .replace(/亚马逊[一-鿿]*\s*[（(]\s*(AWS|Amazon [^)）]+?)\s*[)）]/g, "$1")
+    .replace(/\bAWS\s*[（(]\s*AWS\s*[)）]/g, "AWS")
+    .replace(/\b(Amazon [A-Za-z0-9]+(?: [A-Za-z0-9]+)*?)\s*[（(]\s*\1\s*[)）]/g, "$1")
+}
+
+function polishTranslation(text: string, source: string) {
+  let result = polishProductNames(text, source)
   if (/\bModel Context Protocol\b/i.test(source))
     result = result.replace(/模型上文协议/g, "模型上下文协议")
   if (/\blarge language models?\b/i.test(source))
@@ -60,7 +110,13 @@ function polishTranslation(text: string, source: string) {
     result = result.replace(/强化学学习/g, "强化学习")
   if (/\bagents?\b/i.test(source))
     result = result.replace(/(AI|LLM|RL|语言模型)\s*代理/g, "$1 智能体")
+  // Restoring English product names leaves them jammed against the surrounding
+  // Chinese ("通过Amazon Bedrock在"), so re-space the CJK/Latin boundaries.
   return result
+    .replace(/([一-鿿])([A-Za-z0-9])/g, "$1 $2")
+    .replace(/([A-Za-z0-9])([一-鿿])/g, "$1 $2")
+    .replace(/ {2,}/g, " ")
+    .trim()
 }
 
 function needsEnglishTranslation(text: string) {
@@ -70,7 +126,7 @@ function needsEnglishTranslation(text: string) {
 }
 
 function cacheKey(text: string) {
-  return createHash("sha256").update(`v2:en:zh:${TERMINOLOGY_NAME || "default"}:${text}`).digest("hex")
+  return createHash("sha256").update(`v5:en:zh:${TERMINOLOGY_NAME || "default"}:${text}`).digest("hex")
 }
 
 async function getDatabase() {
@@ -213,5 +269,6 @@ export async function withTranslatedHover(items: NewsItem[]): Promise<NewsItem[]
 export const __translateInternals = {
   normalizeText,
   polishTranslation,
+  polishProductNames,
   withTranslateSlot,
 }

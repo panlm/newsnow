@@ -268,6 +268,16 @@ export const originSources = {
     home: "https://solidot.org",
     interval: Time.Slow,
   },
+  // Source filenames must not contain a hyphen: the rollup glob turns them into
+  // import identifiers, so `aws-blog` would be parsed as `aws` minus `blog`.
+  "awsblog": {
+    name: "AWS Blog",
+    title: "全分类",
+    color: "orange",
+    column: "tech",
+    interval: Time.Common,
+    home: "https://aws.amazon.com/blogs/",
+  },
   "arxiv": {
     name: "arXiv",
     title: "AI 最新论文",

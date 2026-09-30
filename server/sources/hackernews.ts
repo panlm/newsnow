@@ -13,10 +13,13 @@ interface RSSItem {
 }
 
 async function withHackerNewsDescriptions(entries: { item: NewsItem, summaryUrl: string }[]) {
+  // Unlike arXiv, a Hacker News story carries no abstract, so the hover has to
+  // be generated from the linked article itself. Summaries are cached per URL,
+  // so a refresh only pays for stories that just entered the front page.
   const enriched = await withPageDescriptions(entries.map(({ item, summaryUrl }) => ({
     ...item,
     url: summaryUrl,
-  })), { maxFetches: 10 })
+  })), { maxFetches: 30, concurrency: 6, llm: true })
 
   return enriched.map((item, index) => {
     const original = entries[index].item
