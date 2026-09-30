@@ -14,18 +14,34 @@ const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000
 /** Bump when the prompt or post-processing changes, so stale summaries are not reused. */
 const PROMPT_VERSION = "s1"
 
-const SYSTEM_PROMPT = `你是技术新闻编辑。读完给定网页正文后，用简体中文写一段 3-5 句话的摘要。
+const SYSTEM_PROMPTS = {
+  article: `你是技术新闻编辑。读完给定网页正文后，用简体中文写一段 3-5 句话的摘要。
 
 要求：
 - 概括文章做了什么、结论是什么、有哪些关键数据或版本号。
 - 保留专有名词、产品名、公司名的英文原文。
 - 只输出摘要正文。不要标题、不要前缀、不要 markdown、不要引号、不要"本文"之类的套话。
-- 如果正文是登录墙、付费墙、报错页、导航列表，或内容不足以概括，只输出 SKIP。`
+- 如果正文是登录墙、付费墙、报错页、导航列表，或内容不足以概括，只输出 SKIP。`,
+
+  repo: `你是机器学习工程师。读完给定的 Hugging Face 模型卡或数据集卡后，用简体中文写一段 3-5 句话的说明。
+
+要求：
+- 说清它是什么、基于哪个基座模型、参数量或数据规模、主要能力和典型用途，以及许可证或使用限制。
+- 有基准分数、上下文长度、语言数量这类关键数字就照抄。
+- 保留模型名、机构名、指标名、许可证标识的英文原文。
+- 只输出正文。不要标题、不要前缀、不要 markdown、不要引号。
+- 如果卡片只有模板占位、只有标签列表、只有安装命令，或内容不足以说明，只输出 SKIP。`,
+} as const
+
+export type SummaryVariant = keyof typeof SYSTEM_PROMPTS
 
 interface SummarizeInput {
   url: string
   title: string
   text: string
+  variant?: SummaryVariant
+  /** Extra cache-key input, e.g. a repo's lastModified, so edits are picked up. */
+  version?: string
 }
 
 interface SummaryRow {
@@ -56,8 +72,9 @@ function remember(id: string, summary: string) {
   }
 }
 
-function cacheKey(url: string) {
-  return createHash("sha256").update(`${PROMPT_VERSION}:${modelId()}:${url}`).digest("hex")
+function cacheKey(input: SummarizeInput) {
+  const parts = [PROMPT_VERSION, modelId(), input.variant ?? "article", input.version ?? "", input.url]
+  return createHash("sha256").update(parts.join(":")).digest("hex")
 }
 
 async function getDatabase() {
@@ -158,7 +175,7 @@ async function invoke(input: SummarizeInput) {
   try {
     const response = await client.send(new ConverseCommand({
       modelId: modelId(),
-      system: [{ text: SYSTEM_PROMPT }],
+      system: [{ text: SYSTEM_PROMPTS[input.variant ?? "article"] }],
       messages: [{
         role: "user",
         content: [{ text: `标题：${input.title}\n链接：${input.url}\n\n正文：\n${input.text}` }],
@@ -180,7 +197,7 @@ async function invoke(input: SummarizeInput) {
 export async function summarizeArticle(input: SummarizeInput): Promise<string | undefined> {
   if (!summaryEnabled()) return undefined
 
-  const id = cacheKey(input.url)
+  const id = cacheKey(input)
   const db = await getDatabase()
   const cached = await getCachedSummary(db, id)
   if (cached) return cached
