@@ -334,6 +334,167 @@
     "color": "teal",
     "interval": 3600000
   },
+  "awsblog": {
+    "redirect": "awsblog-all",
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "全分类"
+  },
+  "awsblog-all": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "全分类"
+  },
+  "awsblog-compute": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "计算"
+  },
+  "awsblog-ai": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "机器学习与 AI"
+  },
+  "awsblog-security": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "安全与合规"
+  },
+  "awsblog-databases": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "数据库"
+  },
+  "awsblog-analytics": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "分析"
+  },
+  "awsblog-storage": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "存储"
+  },
+  "awsblog-management": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "管理与治理"
+  },
+  "awsblog-networking": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "网络与内容分发"
+  },
+  "awsblog-integration": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "应用集成"
+  },
+  "awsblog-mobile": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "移动"
+  },
+  "awsblog-devtools": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "开发者工具"
+  },
+  "awsblog-iot": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "物联网"
+  },
+  "awsblog-robotics": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "机器人"
+  },
+  "awsblog-quantum": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "量子技术"
+  },
+  "awsblog-media": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "媒体服务"
+  },
+  "awsblog-migration": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "迁移"
+  },
+  "awsblog-satellite": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "卫星"
+  },
+  "awsblog-blockchain": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "区块链"
+  },
   "arxiv": {
     "title": "AI 最新论文",
     "name": "arXiv",

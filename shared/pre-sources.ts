@@ -272,11 +272,33 @@ export const originSources = {
   // import identifiers, so `aws-blog` would be parsed as `aws` minus `blog`.
   "awsblog": {
     name: "AWS Blog",
-    title: "全分类",
     color: "orange",
     column: "tech",
     interval: Time.Common,
     home: "https://aws.amazon.com/blogs/",
+    // `all` must stay first: genSources points the bare `awsblog` id at the
+    // first sub, so the old全分类 bookmark keeps resolving.
+    sub: {
+      all: { title: "全分类" },
+      compute: { title: "计算" },
+      ai: { title: "机器学习与 AI" },
+      security: { title: "安全与合规" },
+      databases: { title: "数据库" },
+      analytics: { title: "分析" },
+      storage: { title: "存储" },
+      management: { title: "管理与治理" },
+      networking: { title: "网络与内容分发" },
+      integration: { title: "应用集成" },
+      mobile: { title: "移动" },
+      devtools: { title: "开发者工具" },
+      iot: { title: "物联网" },
+      robotics: { title: "机器人" },
+      quantum: { title: "量子技术" },
+      media: { title: "媒体服务" },
+      migration: { title: "迁移" },
+      satellite: { title: "卫星" },
+      blockchain: { title: "区块链" },
+    },
   },
   "arxiv": {
     name: "arXiv",
