@@ -333,6 +333,14 @@ export const originSources = {
       },
     },
   },
+  "anthropic": {
+    name: "Anthropic",
+    title: "News",
+    color: "amber",
+    column: "tech",
+    interval: Time.Common,
+    home: "https://www.anthropic.com/news",
+  },
   "hackernews": {
     name: "Hacker News",
     color: "orange",

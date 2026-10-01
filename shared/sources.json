@@ -541,6 +541,14 @@
     "interval": 1800000,
     "title": "热门数据集"
   },
+  "anthropic": {
+    "title": "News",
+    "name": "Anthropic",
+    "column": "tech",
+    "home": "https://www.anthropic.com/news",
+    "color": "amber",
+    "interval": 1800000
+  },
   "hackernews": {
     "name": "Hacker News",
     "type": "hottest",

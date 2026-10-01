@@ -241,7 +241,6 @@ function HoverSummary({ item }: { item: NewsItem }) {
         maxHeight: "27em",
         overflow: "hidden",
       }}
-      title={summary}
     >
       {summary}
     </span>
@@ -261,7 +260,6 @@ function NewsListHot({ items }: { items: NewsItem[] }) {
           href={width < 768 ? item.mobileUrl || item.url : item.url}
           target="_blank"
           key={item.id}
-          title={item.extra?.hover}
           className={$(
             "flex gap-2 items-center items-stretch relative cursor-pointer [&_*]:cursor-pointer transition-all",
             "hover:bg-neutral-400/10 rounded-md pr-1 visited:(text-neutral-400)",
@@ -307,7 +305,6 @@ function NewsListTimeLine({ items }: { items: NewsItem[] }) {
               "cursor-pointer [&_*]:cursor-pointer transition-all",
             )}
             href={width < 768 ? item.mobileUrl || item.url : item.url}
-            title={item.extra?.hover}
             target="_blank"
             rel="noopener noreferrer"
           >
