@@ -1,4 +1,5 @@
 import type { FixedColumnID, SourceID } from "@shared/types"
+import { sortableColumnIds } from "@shared/metadata"
 import type { Update } from "./types"
 
 export const focusSourcesAtom = atom((get) => {
@@ -21,7 +22,7 @@ export const currentSourcesAtom = atom((get) => {
   const id = get(currentColumnIDAtom)
   return get(primitiveMetadataAtom).data[id]
 }, (get, set, update: Update<SourceID[]>) => {
-  if (get(currentColumnIDAtom) !== "focus") return
+  if (!sortableColumnIds.includes(get(currentColumnIDAtom))) return
   const _ = update instanceof Function ? update(get(currentSourcesAtom)) : update
   set(primitiveMetadataAtom, {
     updatedTime: Date.now(),
@@ -38,3 +39,17 @@ export const goToTopAtom = atom({
   el: undefined as HTMLElement | undefined,
   fn: undefined as (() => void) | undefined,
 })
+
+// Hover summary language ("zh" default). Only 国际版 bilingual sources react to it;
+// single-language hovers (other modules) ignore it. Persisted per browser.
+const HOVER_LANG_KEY = "hoverLang"
+const hoverLangBase = atom<"zh" | "en">(
+  (typeof localStorage !== "undefined" && localStorage.getItem(HOVER_LANG_KEY) === "en") ? "en" : "zh",
+)
+export const hoverLangAtom = atom(
+  get => get(hoverLangBase),
+  (get, set, lang: "zh" | "en") => {
+    set(hoverLangBase, lang)
+    if (typeof localStorage !== "undefined") localStorage.setItem(HOVER_LANG_KEY, lang)
+  },
+)

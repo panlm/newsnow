@@ -3,7 +3,7 @@ import { useIsFetching } from "@tanstack/react-query"
 import type { SourceID } from "@shared/types"
 import { NavBar } from "../navbar"
 import { Menu } from "./menu"
-import { currentSourcesAtom, goToTopAtom } from "~/atoms"
+import { currentSourcesAtom, goToTopAtom, hoverLangAtom } from "~/atoms"
 
 function GoTop() {
   const { ok, fn: goToTop } = useAtomValue(goToTopAtom)
@@ -20,6 +20,21 @@ function GoTop() {
 function Github() {
   return (
     <button type="button" title="Github" className="i-ph:github-logo-duotone btn" onClick={() => window.open(Homepage)} />
+  )
+}
+
+function HoverLang() {
+  const [lang, setLang] = useAtom(hoverLangAtom)
+  return (
+    <button
+      type="button"
+      title="切换国际版摘要语言 中/EN"
+      className="btn text-sm font-bold w-6 text-center"
+      onClick={() => setLang(lang === "zh" ? "en" : "zh")}
+    >
+      {/* Show the language you'll switch TO: zh now → tap for EN. */}
+      {lang === "zh" ? "EN" : "中"}
+    </button>
   )
 }
 
@@ -70,6 +85,7 @@ export function Header() {
       </span>
       <span className="justify-self-end flex gap-2 items-center text-xl text-primary-600 dark:text-primary">
         <GoTop />
+        <HoverLang />
         <Refresh />
         <Github />
         <Menu />

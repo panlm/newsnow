@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query"
 import { AnimatePresence, motion, useInView } from "framer-motion"
 import { useWindowSize } from "react-use"
 import { forwardRef, useImperativeHandle } from "react"
+import { sortableColumnIds } from "@shared/metadata"
 import { OverlayScrollbar } from "../common/overlay-scrollbar"
+import { currentColumnIDAtom, currentSourcesAtom, hoverLangAtom } from "~/atoms"
 import { safeParseString } from "~/utils"
 
 export interface ItemsProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -18,6 +20,35 @@ export interface ItemsProps extends React.HTMLAttributes<HTMLDivElement> {
 interface NewsCardProps {
   id: SourceID
   setHandleRef?: (ref: HTMLElement | null) => void
+}
+
+// Reordering a card used to yank the viewport to wherever the card landed (the
+// focused button got scrolled into view). Blur the button and pin the scroll
+// container's scrollTop across the reorder + auto-animate so the view stays put.
+function reorderKeepingScroll(from: HTMLElement, run: () => void) {
+  let node: HTMLElement | null = from.parentElement
+  let scroller: HTMLElement | null = null
+  while (node) {
+    const oy = getComputedStyle(node).overflowY
+    if ((oy === "auto" || oy === "scroll") && node.scrollHeight > node.clientHeight) {
+      scroller = node
+      break
+    }
+    node = node.parentElement
+  }
+  from.blur()
+  const prev = scroller?.scrollTop ?? 0
+  run()
+  if (scroller) {
+    const restore = () => {
+      scroller!.scrollTop = prev
+    }
+    requestAnimationFrame(() => {
+      restore()
+      requestAnimationFrame(restore)
+    })
+    setTimeout(restore, 250)
+  }
 }
 
 export const CardWrapper = forwardRef<HTMLElement, ItemsProps>(({ id, isDragging, setHandleRef, style, ...props }, dndRef) => {
@@ -103,6 +134,9 @@ function NewsCard({ id, setHandleRef }: NewsCardProps) {
   })
 
   const { isFocused, toggleFocus } = useFocusWith(id)
+  const currentColumnID = useAtomValue(currentColumnIDAtom)
+  const setSources = useSetAtom(currentSourcesAtom)
+  const canReorder = sortableColumnIds.includes(currentColumnID)
 
   return (
     <>
@@ -131,6 +165,22 @@ function NewsCard({ id, setHandleRef }: NewsCardProps) {
           </span>
         </div>
         <div className={$("flex gap-2 text-lg", `color-${sources[id].color}`)}>
+          {canReorder && (
+            <>
+              <button
+                type="button"
+                title="置顶"
+                className={$("btn i-ph:arrow-line-up-bold")}
+                onClick={e => reorderKeepingScroll(e.currentTarget, () => setSources(list => [id, ...list.filter(x => x !== id)]))}
+              />
+              <button
+                type="button"
+                title="置底"
+                className={$("btn i-ph:arrow-line-down-bold")}
+                onClick={e => reorderKeepingScroll(e.currentTarget, () => setSources(list => [...list.filter(x => x !== id), id]))}
+              />
+            </>
+          )}
           <button
             type="button"
             className={$("btn i-ph:arrow-counter-clockwise-duotone", isFetching && "animate-spin i-ph:circle-dashed-duotone")}
@@ -223,7 +273,10 @@ function ExtraInfo({ item }: { item: NewsItem }) {
 }
 
 function HoverSummary({ item }: { item: NewsItem }) {
-  const summary = item.extra?.hover
+  const lang = useAtomValue(hoverLangAtom)
+  // Bilingual (国际版) items carry hoverEn; others only have hover and ignore the switch.
+  const raw = lang === "en" && item.extra?.hoverEn ? item.extra.hoverEn : item.extra?.hover
+  const summary = raw
     ?.replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim()

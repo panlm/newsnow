@@ -1,5 +1,6 @@
 import type { AllSourceID } from "@shared/types"
 import defu from "defu"
+import { withBilingualHover } from "#/utils/translate"
 import type { RSSHubOption, RSSHubInfo as RSSHubResponse, SourceGetter, SourceOption } from "#/types"
 
 type R = Partial<Record<AllSourceID, SourceGetter>>
@@ -19,6 +20,39 @@ export function defineRSSSource(url: string, option?: SourceOption): SourceGette
       id: item.link,
       pubDate: !option?.hiddenDate ? item.created : undefined,
     }))
+  }
+}
+
+function cleanRSSDescription(value?: string) {
+  if (!value) return undefined
+  const text = value
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#8217;|&#x2019;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim()
+  return text || undefined
+}
+
+/**
+ * RSS source for 国际版 (world) outlets: carries the item description as an English
+ * hover, which withBilingualHover turns into en + zh so the UI switch can flip it.
+ */
+export function defineBilingualRSSSource(url: string, option?: SourceOption): SourceGetter {
+  return async () => {
+    const data = await rss2json(url)
+    if (!data?.items.length) throw new Error("Cannot fetch rss data")
+    const items = data.items.slice(0, 30).map(item => ({
+      title: item.title,
+      url: item.link,
+      id: item.link,
+      pubDate: !option?.hiddenDate ? item.created : undefined,
+      extra: {
+        hover: cleanRSSDescription(item.description),
+      },
+    }))
+    return withBilingualHover(items)
   }
 }
 

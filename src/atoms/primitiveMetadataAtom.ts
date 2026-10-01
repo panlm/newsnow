@@ -1,5 +1,6 @@
 import type { PrimitiveAtom } from "jotai"
 import type { FixedColumnID, PrimitiveMetadata, SourceID } from "@shared/types"
+import { sortableColumnIds } from "@shared/metadata"
 import type { Update } from "./types"
 
 function createPrimitiveMetadataAtom(
@@ -44,6 +45,14 @@ export function preprocessMetadata(target: PrimitiveMetadata) {
           .filter(([id]) => initialMetadata[id])
           .map(([id, s]) => {
             if (id === "focus") return [id, s.filter(k => sources[k]).map(k => sources[k].redirect ?? k)]
+            // Sortable category columns are auto-populated, so keep the user's saved
+            // order but merge in any sources added since (append) and drop removed ones.
+            if (sortableColumnIds.includes(id)) {
+              const staticList = initialMetadata[id] ?? []
+              const kept = (s ?? []).filter(k => sources[k] && !sources[k].redirect && staticList.includes(k))
+              const appended = staticList.filter(k => !kept.includes(k))
+              return [id, [...kept, ...appended]]
+            }
             return [id, initialMetadata[id]]
           }),
       ),

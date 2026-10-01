@@ -1,4 +1,5 @@
 export const updatedSourceIds = [
+  "anthropic",
   "awsblog-all",
   "awsblog-compute",
   "awsblog-ai",

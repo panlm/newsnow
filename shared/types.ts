@@ -92,6 +92,8 @@ export interface NewsItem {
   pubDate?: number | string
   extra?: {
     hover?: string
+    /** English alternate for the hover summary; only set for bilingual (国际版) sources. */
+    hoverEn?: string
     date?: number | string
     info?: false | string
     diff?: number

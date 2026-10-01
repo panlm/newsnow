@@ -9,6 +9,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react"
 import { motion } from "framer-motion"
 import { useWindowSize } from "react-use"
 import { isMobile } from "react-device-detect"
+import { sortableColumnIds } from "@shared/metadata"
 import { DndContext } from "../common/dnd"
 import { useSortable } from "../common/dnd/useSortable"
 import { OverlayScrollbar } from "../common/overlay-scrollbar"
@@ -21,7 +22,7 @@ const WIDTH = 350
 export function Dnd() {
   const [items, setItems] = useAtom(currentSourcesAtom)
   const currentColumnID = useAtomValue(currentColumnIDAtom)
-  const sortable = currentColumnID === "focus"
+  const sortable = sortableColumnIds.includes(currentColumnID)
   const [parent] = useAutoAnimate({ duration: AnimationDuration })
   useEntireQuery(items)
   const { width } = useWindowSize()

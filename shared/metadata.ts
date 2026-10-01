@@ -38,6 +38,11 @@ const updatedSourceIds = [..._updatedSourceIds] as SourceID[]
 export const fixedColumnIds = ["focus", "tech", "china", "world", "finance", "hottest", "realtime", "updated"] as const satisfies Partial<ColumnID>[]
 export const hiddenColumns = Object.keys(columns).filter(id => !fixedColumnIds.includes(id as any)) as HiddenColumnID[]
 
+// hottest/realtime/updated are computed (by type / recency), so reordering them is
+// meaningless. The rest are user-reorderable and persist their order per browser.
+export const computedColumnIds = ["hottest", "realtime", "updated"] as const satisfies Partial<ColumnID>[]
+export const sortableColumnIds = fixedColumnIds.filter(id => !computedColumnIds.includes(id as any))
+
 function getSortedSourceIds(type: "hottest" | "realtime") {
   return typeSafeObjectEntries(sources)
     .filter(([, v]) => v.type === type && !v.redirect)

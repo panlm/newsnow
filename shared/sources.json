@@ -217,6 +217,46 @@
     "color": "red",
     "interval": 1800000
   },
+  "instagram": {
+    "title": "新闻号",
+    "name": "Instagram",
+    "column": "world",
+    "home": "https://www.instagram.com",
+    "color": "rose",
+    "interval": 1800000
+  },
+  "bbcworld": {
+    "title": "World",
+    "name": "BBC",
+    "column": "world",
+    "home": "https://www.bbc.com/news/world",
+    "color": "red",
+    "interval": 1800000
+  },
+  "guardianworld": {
+    "title": "World",
+    "name": "The Guardian",
+    "column": "world",
+    "home": "https://www.theguardian.com/world",
+    "color": "blue",
+    "interval": 1800000
+  },
+  "aljazeera": {
+    "title": "News",
+    "name": "Al Jazeera",
+    "column": "world",
+    "home": "https://www.aljazeera.com",
+    "color": "amber",
+    "interval": 1800000
+  },
+  "nytworld": {
+    "title": "World",
+    "name": "NYT",
+    "column": "world",
+    "home": "https://www.nytimes.com/section/world",
+    "color": "slate",
+    "interval": 1800000
+  },
   "pcbeta": {
     "redirect": "pcbeta-windows11",
     "name": "远景论坛",

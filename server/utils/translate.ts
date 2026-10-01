@@ -84,13 +84,14 @@ function polishProductNames(text: string, source: string) {
   // Catch the long tail: any "Amazon <Name>" the engine turned into "亚马逊 <Name>".
   if (/\bAmazon [A-Z]/.test(source)) {
     result = result
-      .replace(/亚马逊\s*(?=[A-Za-z])/g, "Amazon ")
+      .replace(/亚马逊\s*(?=[A-Z])/gi, "Amazon ")
       .replace(/Amazon {2,}/g, "Amazon ")
   }
   // The engine likes to emit its own Chinese rendering followed by the English
   // product name in parentheses ("亚马逊简单存储服务（Amazon S3）"), and the AWS rule
   // above turns "Amazon Web Services (AWS)" into "AWS (AWS)". Drop the redundant half.
   return result
+    // eslint-disable-next-line regexp/no-obscure-range, regexp/no-super-linear-backtracking -- CJK range + bounded product name, intentional
     .replace(/亚马逊[一-鿿]*\s*[（(]\s*(AWS|Amazon [^)）]+?)\s*[)）]/g, "$1")
     .replace(/\bAWS\s*[（(]\s*AWS\s*[)）]/g, "AWS")
     .replace(/\b(Amazon [A-Za-z0-9]+(?: [A-Za-z0-9]+)*?)\s*[（(]\s*\1\s*[)）]/g, "$1")
@@ -113,8 +114,10 @@ function polishTranslation(text: string, source: string) {
   // Restoring English product names leaves them jammed against the surrounding
   // Chinese ("通过Amazon Bedrock在"), so re-space the CJK/Latin boundaries.
   return result
-    .replace(/([一-鿿])([A-Za-z0-9])/g, "$1 $2")
-    .replace(/([A-Za-z0-9])([一-鿿])/g, "$1 $2")
+    // eslint-disable-next-line regexp/no-obscure-range -- CJK/Latin boundary spacing, intentional
+    .replace(/([一-鿿])([A-Z0-9])/gi, "$1 $2")
+    // eslint-disable-next-line regexp/no-obscure-range -- CJK/Latin boundary spacing, intentional
+    .replace(/([A-Z0-9])([一-鿿])/gi, "$1 $2")
     .replace(/ {2,}/g, " ")
     .trim()
 }
@@ -261,6 +264,30 @@ export async function withTranslatedHover(items: NewsItem[]): Promise<NewsItem[]
       extra: {
         ...item.extra,
         hover: translated,
+      },
+    }
+  }))
+}
+
+/**
+ * For 国际版 (world) sources whose hover starts out as English: keep the English
+ * original in `hoverEn` and put the Chinese translation in `hover` (the default
+ * shown). The UI en/zh switch flips between the two. When translation is off, the
+ * English text stays in `hover` and there is simply nothing to switch to.
+ */
+export async function withBilingualHover(items: NewsItem[]): Promise<NewsItem[]> {
+  if (!translationEnabled()) return items
+
+  return Promise.all(items.map(async (item) => {
+    const en = item.extra?.hover?.trim()
+    if (!en) return item
+    const zh = await translateText(en)
+    return {
+      ...item,
+      extra: {
+        ...item.extra,
+        hover: zh,
+        hoverEn: en,
       },
     }
   }))
