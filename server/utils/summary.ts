@@ -6,6 +6,7 @@ import { isIP } from "node:net"
 import type { LookupFunction } from "node:net"
 import type { NewsItem } from "@shared/types"
 import * as cheerio from "cheerio"
+import iconv from "iconv-lite"
 import { summarizeArticle } from "#/utils/llm"
 
 const MAX_RESPONSE_BYTES = 512 * 1024
@@ -95,6 +96,37 @@ async function resolvePublicTarget(url: URL) {
   return records[0]
 }
 
+/** Decode an HTML body by its declared charset (Content-Type, then <meta>), not forced utf-8. */
+function decodeHtml(buf: Buffer, contentType?: string) {
+  let charset = /charset=["']?([\w-]+)/i.exec(contentType ?? "")?.[1]
+  if (!charset) {
+    const head = buf.subarray(0, 2048).toString("latin1")
+    charset = /<meta[^>]+charset=["']?([\w-]+)/i.exec(head)?.[1]
+      ?? /charset=["']?([\w-]+)/i.exec(head)?.[1]
+  }
+  const cs = (charset ?? "utf-8").toLowerCase().trim()
+  if (cs === "utf-8" || cs === "utf8" || cs === "ascii" || cs === "us-ascii") return buf.toString("utf8")
+  try {
+    if (iconv.encodingExists(cs)) return iconv.decode(buf, cs)
+  } catch {}
+  return buf.toString("utf8")
+}
+
+/** Reject text that is mostly U+FFFD replacement chars (a mis-decoded page). */
+function looksGarbled(text?: string) {
+  if (!text) return false
+  const bad = (text.match(/\uFFFD/g) ?? []).length
+  return bad >= 2 || bad / text.length > 0.05
+}
+
+// Some sites expose only an app-promo blurb as their meta description (e.g.
+// \u53C2\u8003\u6D88\u606F: "\u5206\u4EAB\u6765\u81EA\u53C2\u8003\u6D88\u606F\u5BA2\u6237\u7AEF\uFF0C\u8BF7\u70B9\u51FB\u6253\u5F00\u66F4\u591A\u7CBE\u5F69"). That is the same string on
+// every article, so it is noise, not a summary \u2014 drop it.
+const BOILERPLATE_DESCRIPTION = /\u5206\u4EAB\u6765\u81EA|\u8BF7\u70B9\u51FB|\u4E0B\u8F7D.{0,4}\u5BA2\u6237\u7AEF|\u6253\u5F00.{0,4}\u5BA2\u6237\u7AEF|\u66F4\u591A\u7CBE\u5F69|\u6253\u5F00(?:APP|\u5E94\u7528)|\u626B\u7801\u5173\u6CE8|\u5173\u6CE8\u6211\u4EEC|\u6B22\u8FCE(?:\u4E0B\u8F7D|\u5173\u6CE8)/i
+function isLowValueDescription(text?: string) {
+  return !!text && BOILERPLATE_DESCRIPTION.test(text)
+}
+
 async function fetchPublicHtml(input: string, redirects = 0): Promise<string> {
   const url = new URL(input)
   const target = await resolvePublicTarget(url)
@@ -153,18 +185,20 @@ async function fetchPublicHtml(input: string, redirects = 0): Promise<string> {
         return
       }
 
+      // Collect raw bytes, not a forced-utf8 string: GB2312/GBK publishers (e.g.
+      // 联合早报) would otherwise decode into U+FFFD mojibake. Decode by the
+      // page's declared charset instead.
+      const chunks: Buffer[] = []
       let bytes = 0
-      let html = ""
-      response.setEncoding("utf8")
-      response.on("data", (chunk: string) => {
-        bytes += Buffer.byteLength(chunk)
+      response.on("data", (chunk: Buffer) => {
+        bytes += chunk.length
         if (bytes > MAX_RESPONSE_BYTES) {
           response.destroy(new Error("article response is too large"))
           return
         }
-        html += chunk
+        chunks.push(chunk)
       })
-      response.on("end", () => resolve(html))
+      response.on("end", () => resolve(decodeHtml(Buffer.concat(chunks), contentType)))
       response.on("error", reject)
     })
     req.setTimeout(PAGE_TIMEOUT_MS, () => req.destroy(new Error("article request timed out")))
@@ -191,7 +225,7 @@ function extractArticleText($: cheerio.CheerioAPI) {
     ?? $("body")
   const text = (root?.length ? root : $("body"))
     .text()
-    .replace(/[\t\f\v ]+/g, " ")
+    .replace(/[\t\f\v\xA0]+/g, " ")
     .replace(/\s*\n\s*/g, "\n")
     .replace(/\n{2,}/g, "\n")
     .replace(/ {2,}/g, " ")
@@ -212,7 +246,7 @@ async function addPageDescription(item: NewsItem, options: PageDescriptionOption
       : undefined
     const hover = summary ?? description
 
-    if (!hover) return item
+    if (!hover || looksGarbled(hover) || isLowValueDescription(hover)) return item
     return {
       ...item,
       extra: {
