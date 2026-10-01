@@ -293,6 +293,66 @@ export async function withBilingualHover(items: NewsItem[]): Promise<NewsItem[]>
   }))
 }
 
+function hasChinese(text: string) {
+  return (text.match(/[\u3400-\u9FFF]/g) ?? []).length >= 4
+}
+
+/** zh -> en, cached separately from the en -> zh path. */
+async function translateZhToEn(text: string) {
+  const source = normalizeText(text)
+  if (!source || !hasChinese(source)) return text
+
+  const id = createHash("sha256").update(`v5:zh:en:${source}`).digest("hex")
+  const db = await getDatabase()
+  const cached = await getCachedTranslation(db, id)
+  if (cached) return cached
+
+  try {
+    client ??= new TranslateClient({
+      region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "ap-northeast-1",
+    })
+    const response = await withTranslateSlot(() => sendTranslate(new TranslateTextCommand({
+      SourceLanguageCode: "zh",
+      TargetLanguageCode: "en",
+      Text: source,
+    })))
+    const translated = response.TranslatedText?.trim()
+    if (!translated) return text
+    await setCachedTranslation(db, id, source, translated)
+    return translated
+  } catch (error) {
+    if (!loggedError) {
+      loggedError = true
+      logger.warn("hover translation unavailable; preserving source text", error)
+    }
+    return text
+  }
+}
+
+/**
+ * Make every 国际版 hover bilingual regardless of its original language: Chinese
+ * hovers (联合早报, 卫星通讯社) gain an English `hoverEn`, English ones (Steam) get a
+ * Chinese `hover` with the original kept in `hoverEn`. Items already bilingual (the
+ * RSS media / Instagram) or without any hover are left alone. The default-shown
+ * `hover` always ends up Chinese so the EN/中 switch flips consistently.
+ */
+export async function withBilingualHoverAuto(items: NewsItem[]): Promise<NewsItem[]> {
+  if (!translationEnabled()) return items
+
+  return Promise.all(items.map(async (item) => {
+    const hover = item.extra?.hover?.trim()
+    if (!hover || item.extra?.hoverEn) return item
+    if (hasChinese(hover)) {
+      const en = await translateZhToEn(hover)
+      if (en === hover) return item
+      return { ...item, extra: { ...item.extra, hover, hoverEn: en } }
+    }
+    const zh = await translateText(hover)
+    if (zh === hover) return item
+    return { ...item, extra: { ...item.extra, hover: zh, hoverEn: hover } }
+  }))
+}
+
 export const __translateInternals = {
   normalizeText,
   polishTranslation,
