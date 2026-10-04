@@ -1,5 +1,4 @@
 export const updatedSourceIds = [
-  "arxiv",
   "awsblog-all",
   "awsblog-china",
   "awsblog-compute",
@@ -20,6 +19,7 @@ export const updatedSourceIds = [
   "awsblog-migration",
   "awsblog-satellite",
   "awsblog-blockchain",
+  "arxiv",
   "huggingface-papers",
   "huggingface-models",
   "huggingface-datasets",

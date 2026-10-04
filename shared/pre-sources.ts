@@ -1,5 +1,5 @@
 import process from "node:process"
-import { Interval } from "./consts"
+import { AwsBlogMaxItems, Interval } from "./consts"
 import { typeSafeObjectFromEntries } from "./type.util"
 import type { OriginSource, Source, SourceID } from "./types"
 
@@ -315,6 +315,8 @@ export const originSources = {
     color: "orange",
     column: "tech",
     interval: Time.Common,
+    // Kept by date, not count (see server/sources/awsblog.ts); this only caps it.
+    maxItems: AwsBlogMaxItems,
     home: "https://aws.amazon.com/blogs/",
     // `all` must stay first: genSources points the bare `awsblog` id at the
     // first sub, so the old全分类 bookmark keeps resolving.
@@ -629,6 +631,7 @@ export function genSources() {
       home: source.home,
       color: source.color ?? "primary",
       interval: source.interval ?? Time.Default,
+      maxItems: source.maxItems,
     }
     if (source.sub && Object.keys(source.sub).length) {
       Object.entries(source.sub).forEach(([subId, subSource], i) => {

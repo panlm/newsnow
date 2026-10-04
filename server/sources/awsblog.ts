@@ -6,6 +6,7 @@ interface AwsBlogItem {
     additionalFields?: {
       title?: string
       link?: string
+      createdDate?: string
       displayDate?: string
       postExcerpt?: string
     }
@@ -18,12 +19,47 @@ interface AwsBlogItem {
 const endpoint = "https://aws.amazon.com/api/dirs/items/search"
 const baseQuery = `item.directoryId=blog-posts&sort_by=item.additionalFields.createdDate&sort_order=desc&size=${MaxItems}`
 
+const DAY = 24 * 60 * 60 * 1000
+
 /**
  * Posts carry two category axes. `blog-posts#category` mixes real topics with
  * bookkeeping tags (post-types, learning-levels), so filter on
  * `GLOBAL#tech-category` instead — one tag per AWS service category.
  */
 const TECH_CATEGORY_NAMESPACE = "GLOBAL#tech-category"
+
+/**
+ * Keep every post of the last `AwsBlogDays` days, topped up to `MaxItems` when the
+ * window holds fewer: awsblog-all publishes ~120 posts in 8 days, but the China blog
+ * and most categories only a handful (some none), so a strict window would empty
+ * their cards. Pages are fetched newest first until one reaches past the window.
+ */
+async function fetchPosts(url: string) {
+  const since = Date.now() - AwsBlogDays * DAY
+  const items = new Map<string, NewsItem>()
+  let inWindow = 0
+  for (let page = 0; items.size < AwsBlogMaxItems; page++) {
+    const res = await myFetch<{ items?: AwsBlogItem[] }>(`${url}&page=${page}`, { responseType: "json" })
+    const batch = (res?.items ?? []).map(entry => entry?.item?.additionalFields)
+    for (const fields of batch) {
+      // A post published mid-paging shifts the next page by one, so dedupe by link.
+      if (!fields?.link || !fields.title || items.has(fields.link)) continue
+      items.set(fields.link, {
+        id: fields.link,
+        title: fields.title,
+        url: fields.link,
+        extra: {
+          info: fields.displayDate,
+          hover: fields.postExcerpt?.replace(/\s+/g, " ").trim(),
+        },
+      })
+      if (Date.parse(fields.createdDate ?? "") >= since) inWindow = items.size
+    }
+    const oldest = batch.at(-1)?.createdDate
+    if (batch.length < MaxItems || !oldest || Date.parse(oldest) < since) break
+  }
+  return [...items.values()].slice(0, Math.min(Math.max(inWindow, MaxItems), AwsBlogMaxItems))
+}
 
 function feed(category?: string, locale: "en_US" | "zh_CN" = "en_US") {
   const query = `${baseQuery}&item.locale=${locale}`
@@ -32,22 +68,7 @@ function feed(category?: string, locale: "en_US" | "zh_CN" = "en_US") {
     : `${endpoint}?${query}`
 
   return defineSource(async () => {
-    const res = await myFetch<{ items?: AwsBlogItem[] }>(url, { responseType: "json" })
-    const items = (res?.items ?? [])
-      .map<NewsItem | null>((entry) => {
-        const fields = entry?.item?.additionalFields
-        if (!fields?.link || !fields?.title) return null
-        return {
-          id: fields.link,
-          title: fields.title,
-          url: fields.link,
-          extra: {
-            info: fields.displayDate,
-            hover: fields.postExcerpt?.replace(/\s+/g, " ").trim(),
-          },
-        }
-      })
-      .filter((item): item is NewsItem => !!item)
+    const items = await fetchPosts(url)
     // China blog excerpts are already Chinese.
     return locale === "en_US" ? withTranslatedHover(items) : items
   })

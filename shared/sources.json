@@ -381,6 +381,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "全分类"
   },
   "awsblog-all": {
@@ -389,6 +390,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "全分类"
   },
   "awsblog-china": {
@@ -397,6 +399,7 @@
     "home": "https://aws.amazon.com/cn/blogs/china/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "中国区"
   },
   "awsblog-compute": {
@@ -405,6 +408,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "计算"
   },
   "awsblog-ai": {
@@ -413,6 +417,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "机器学习与 AI"
   },
   "awsblog-security": {
@@ -421,6 +426,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "安全与合规"
   },
   "awsblog-databases": {
@@ -429,6 +435,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "数据库"
   },
   "awsblog-analytics": {
@@ -437,6 +444,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "分析"
   },
   "awsblog-storage": {
@@ -445,6 +453,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "存储"
   },
   "awsblog-management": {
@@ -453,6 +462,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "管理与治理"
   },
   "awsblog-networking": {
@@ -461,6 +471,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "网络与内容分发"
   },
   "awsblog-integration": {
@@ -469,6 +480,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "应用集成"
   },
   "awsblog-mobile": {
@@ -477,6 +489,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "移动"
   },
   "awsblog-devtools": {
@@ -485,6 +498,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "开发者工具"
   },
   "awsblog-iot": {
@@ -493,6 +507,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "物联网"
   },
   "awsblog-robotics": {
@@ -501,6 +516,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "机器人"
   },
   "awsblog-quantum": {
@@ -509,6 +525,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "量子技术"
   },
   "awsblog-media": {
@@ -517,6 +534,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "媒体服务"
   },
   "awsblog-migration": {
@@ -525,6 +543,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "迁移"
   },
   "awsblog-satellite": {
@@ -533,6 +552,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "卫星"
   },
   "awsblog-blockchain": {
@@ -541,6 +561,7 @@
     "home": "https://aws.amazon.com/blogs/",
     "color": "orange",
     "interval": 1800000,
+    "maxItems": 500,
     "title": "区块链"
   },
   "arxiv": {

@@ -59,6 +59,11 @@ export interface Source {
    * 刷新的间隔时间
    */
   interval: number
+  /**
+   * 最多保留的条数
+   * @default MaxItems
+   */
+  maxItems?: number
   color: Color
 
   /**
