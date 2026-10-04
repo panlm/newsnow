@@ -74,6 +74,11 @@ const PRODUCT_NAME_FIXES: [RegExp, RegExp, string][] = [
   [/\bAWS Glue\b/i, /AWS\s?胶水/g, "AWS Glue"],
   [/\bAWS Fargate\b/i, /AWS\s?法盖特/g, "AWS Fargate"],
   [/\bStep Functions\b/i, /阶跃函数|步进函数/g, "Step Functions"],
+  // Product names the AI-lab blogs mention; only the capitalized source word guards them.
+  // A following "·" marks a person (克劳德·香农 is Claude Shannon), which stays.
+  [/\bClaudes?\b/, /克劳德斯?(?!\s*·)/g, "Claude"],
+  [/\bMuse\b/, /缪斯/g, "Muse"],
+  [/\bCopilot\b/, /副驾驶/g, "Copilot"],
 ]
 
 function polishProductNames(text: string, source: string) {

@@ -52,4 +52,12 @@ describe("hover translation helpers", () => {
     // ko -> zh renders it 基石 (cornerstone) instead of 基岩 (bedrock).
     expect(polishProductNames("亚马逊基石中的两个盲点", "Amazon Bedrock 앞단 LLM Gateway의 두 가지 사각지대")).toBe("Amazon Bedrock中的两个盲点")
   })
+
+  it("keeps AI product names that the engine transliterates", () => {
+    expect(polishProductNames("克劳德发现了缪斯和副驾驶", "Claude found Muse and Copilot")).toBe("Claude发现了Muse和Copilot")
+    // A lowercase "muse" is the ordinary word, so its rendering stays.
+    expect(polishProductNames("诗人的缪斯", "the poet's muse")).toBe("诗人的缪斯")
+    expect(polishProductNames("克劳德·香农的信息论", "Claude Shannon's information theory")).toBe("克劳德·香农的信息论")
+    expect(polishProductNames("由克劳德斯组成的市场", "a market of Claudes")).toBe("由Claude组成的市场")
+  })
 })
