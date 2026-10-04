@@ -713,7 +713,7 @@
   },
   "hnblogs": {
     "title": "2025",
-    "name": "HN 热门博客",
+    "name": "Karpathy 热门博客",
     "column": "tech",
     "home": "https://refactoringenglish.com/tools/hn-popularity/",
     "color": "orange",

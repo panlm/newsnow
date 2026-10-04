@@ -415,7 +415,7 @@ export const originSources = {
     },
   },
   "hnblogs": {
-    name: "HN 热门博客",
+    name: "Karpathy 热门博客",
     title: "2025",
     color: "orange",
     column: "tech",
