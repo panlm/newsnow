@@ -4,7 +4,7 @@ import { setTimeout as delay } from "node:timers/promises"
 import { describe, expect, it } from "vitest"
 import { __translateInternals } from "./translate"
 
-const { cacheKey, needsTranslation, normalizeText, polishTranslation, withTranslateSlot } = __translateInternals
+const { cacheKey, needsTranslation, normalizeText, polishProductNames, polishTranslation, withTranslateSlot } = __translateInternals
 
 describe("hover translation helpers", () => {
   it("never admits more than five concurrent translations", async () => {
@@ -45,5 +45,11 @@ describe("hover translation helpers", () => {
     expect(needsTranslation("亚马逊云科技发布新的生成式人工智能服务", "ja")).toBe(false)
     expect(needsTranslation("Anthropic Claude Opus 5, Sonnet 5, Amazon Bedrock 서울 리전 출시", "ko")).toBe(true)
     expect(needsTranslation("AWS Weekly Roundup: Amazon Bedrock and more", "ko")).toBe(false)
+  })
+
+  it("restores Amazon Bedrock whichever way the engine renders it", () => {
+    expect(polishProductNames("亚马逊基岩上的智能体", "Agents on Amazon Bedrock")).toBe("Amazon Bedrock上的智能体")
+    // ko -> zh renders it 基石 (cornerstone) instead of 基岩 (bedrock).
+    expect(polishProductNames("亚马逊基石中的两个盲点", "Amazon Bedrock 앞단 LLM Gateway의 두 가지 사각지대")).toBe("Amazon Bedrock中的两个盲点")
   })
 })

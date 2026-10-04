@@ -55,7 +55,7 @@ function normalizeText(text: string) {
  */
 const PRODUCT_NAME_FIXES: [RegExp, RegExp, string][] = [
   [/\bAmazon Web Services\b|\bAWS\b/i, /亚马逊网络服务|亚马逊\s?Web\s?服务|亚马逊云科技/g, "AWS"],
-  [/\bAmazon Bedrock\b/i, /亚马逊基岩|亚马逊\s?Bedrock/g, "Amazon Bedrock"],
+  [/\bAmazon Bedrock\b/i, /亚马逊基[岩石]|亚马逊\s?Bedrock/g, "Amazon Bedrock"],
   [/\bBedrock\b/, /基岩/g, "Bedrock"],
   [/\bAmazon Redshift\b/i, /亚马逊红移/g, "Amazon Redshift"],
   [/\bRedshift\b/, /红移/g, "Redshift"],
