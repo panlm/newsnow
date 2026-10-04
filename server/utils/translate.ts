@@ -122,14 +122,24 @@ function polishTranslation(text: string, source: string) {
     .trim()
 }
 
+/** Languages translated into Chinese. */
+type SourceLanguage = "en" | "ja" | "ko"
+
 function needsEnglishTranslation(text: string) {
   const latinCount = (text.match(/[a-z]/gi) ?? []).length
   const hanCount = (text.match(/[\u3400-\u9FFF]/g) ?? []).length
   return latinCount >= 8 && hanCount < latinCount / 2
 }
 
-function cacheKey(text: string) {
-  return createHash("sha256").update(`v5:en:zh:${TERMINOLOGY_NAME || "default"}:${text}`).digest("hex")
+function needsTranslation(text: string, from: SourceLanguage) {
+  if (from === "en") return needsEnglishTranslation(text)
+  // Kanji alone reads as Chinese, so Japanese is told apart by its kana; Korean by hangul.
+  const script = from === "ja" ? /[\u3040-\u30FF]/g : /[\uAC00-\uD7AF]/g
+  return (text.match(script) ?? []).length >= 2
+}
+
+function cacheKey(text: string, from: SourceLanguage) {
+  return createHash("sha256").update(`v5:${from}:zh:${TERMINOLOGY_NAME || "default"}:${text}`).digest("hex")
 }
 
 async function getDatabase() {
@@ -219,11 +229,11 @@ async function sendTranslate(command: TranslateTextCommand) {
   }
 }
 
-async function translateText(text: string) {
+async function translateText(text: string, from: SourceLanguage = "en") {
   const source = normalizeText(text)
-  if (!source || !needsEnglishTranslation(source)) return text
+  if (!source || !needsTranslation(source, from)) return text
 
-  const id = cacheKey(source)
+  const id = cacheKey(source, from)
   const db = await getDatabase()
   const cached = await getCachedTranslation(db, id)
   if (cached) return cached
@@ -233,9 +243,10 @@ async function translateText(text: string) {
       region: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "ap-northeast-1",
     })
     const response = await withTranslateSlot(() => sendTranslate(new TranslateTextCommand({
-      SourceLanguageCode: "en",
+      SourceLanguageCode: from,
       TargetLanguageCode: "zh",
-      TerminologyNames: TERMINOLOGY_NAME ? [TERMINOLOGY_NAME] : undefined,
+      // The custom terminology is defined for English sources only.
+      TerminologyNames: TERMINOLOGY_NAME && from === "en" ? [TERMINOLOGY_NAME] : undefined,
       Text: source,
     })))
     const translated = response.TranslatedText?.trim()
@@ -264,6 +275,31 @@ export async function withTranslatedHover(items: NewsItem[]): Promise<NewsItem[]
       extra: {
         ...item.extra,
         hover: translated,
+      },
+    }
+  }))
+}
+
+/**
+ * For Japanese and Korean sources (the AWS Japan / Korea blogs): translate the title
+ * as well as the hover, since unlike English neither is readable at a glance. The
+ * original is not kept in `hoverEn`, where the EN/中 switch would mislabel it.
+ */
+export async function withTranslatedTitleAndHover(items: NewsItem[], from: "ja" | "ko"): Promise<NewsItem[]> {
+  if (!translationEnabled()) return items
+
+  return Promise.all(items.map(async (item) => {
+    const hover = item.extra?.hover?.trim()
+    const [title, translatedHover] = await Promise.all([
+      translateText(item.title, from),
+      hover ? translateText(hover, from) : hover,
+    ])
+    return {
+      ...item,
+      title,
+      extra: {
+        ...item.extra,
+        hover: translatedHover,
       },
     }
   }))
@@ -354,6 +390,8 @@ export async function withBilingualHoverAuto(items: NewsItem[]): Promise<NewsIte
 }
 
 export const __translateInternals = {
+  cacheKey,
+  needsTranslation,
   normalizeText,
   polishTranslation,
   polishProductNames,

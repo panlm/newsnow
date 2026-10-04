@@ -1,5 +1,5 @@
 import type { NewsItem } from "@shared/types"
-import { withTranslatedHover } from "#/utils/translate"
+import { withTranslatedHover, withTranslatedTitleAndHover } from "#/utils/translate"
 
 interface AwsBlogItem {
   item?: {
@@ -15,7 +15,8 @@ interface AwsBlogItem {
 
 // The directory search API returns every blog channel at once (machine-learning,
 // containers, networking, security, ...), unlike the per-channel RSS feeds.
-// `item.locale=zh_CN` returns the AWS China blog (aws.amazon.com/cn/blogs/china/).
+// `item.locale=zh_CN` returns the AWS China blog (aws.amazon.com/cn/blogs/china/),
+// `ja_JP` / `ko_KR` the Japan and Korea blogs (aws.amazon.com/jp/blogs/, /ko/blogs/).
 const endpoint = "https://aws.amazon.com/api/dirs/items/search"
 const baseQuery = `item.directoryId=blog-posts&sort_by=item.additionalFields.createdDate&sort_order=desc&size=${MaxItems}`
 
@@ -61,7 +62,7 @@ async function fetchPosts(url: string) {
   return [...items.values()].slice(0, Math.min(Math.max(inWindow, MaxItems), AwsBlogMaxItems))
 }
 
-function feed(category?: string, locale: "en_US" | "zh_CN" = "en_US") {
+function feed(category?: string, locale: "en_US" | "zh_CN" | "ja_JP" | "ko_KR" = "en_US") {
   const query = `${baseQuery}&item.locale=${locale}`
   const url = category
     ? `${endpoint}?${query}&tags.id=${encodeURIComponent(`${TECH_CATEGORY_NAMESPACE}#${category}`)}`
@@ -69,14 +70,18 @@ function feed(category?: string, locale: "en_US" | "zh_CN" = "en_US") {
 
   return defineSource(async () => {
     const items = await fetchPosts(url)
+    if (locale === "en_US") return withTranslatedHover(items)
     // China blog excerpts are already Chinese.
-    return locale === "en_US" ? withTranslatedHover(items) : items
+    if (locale === "zh_CN") return items
+    return withTranslatedTitleAndHover(items, locale === "ja_JP" ? "ja" : "ko")
   })
 }
 
 export default defineSource({
   "awsblog-all": feed(),
   "awsblog-china": feed(undefined, "zh_CN"),
+  "awsblog-japan": feed(undefined, "ja_JP"),
+  "awsblog-korea": feed(undefined, "ko_KR"),
   "awsblog-compute": feed("compute"),
   "awsblog-ai": feed("ai-ml"),
   "awsblog-security": feed("security-identity-compliance"),

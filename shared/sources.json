@@ -400,7 +400,25 @@
     "color": "orange",
     "interval": 1800000,
     "maxItems": 500,
-    "title": "中国区"
+    "title": "中国"
+  },
+  "awsblog-japan": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/jp/blogs/news/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "日本"
+  },
+  "awsblog-korea": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/ko/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "韩国"
   },
   "awsblog-compute": {
     "name": "AWS Blog",

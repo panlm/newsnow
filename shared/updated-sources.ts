@@ -1,6 +1,8 @@
 export const updatedSourceIds = [
   "awsblog-all",
   "awsblog-china",
+  "awsblog-japan",
+  "awsblog-korea",
   "awsblog-compute",
   "awsblog-ai",
   "awsblog-security",
