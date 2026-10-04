@@ -34,7 +34,7 @@ export default defineSource(async () => {
     sortBy: "submittedDate",
     sortOrder: "descending",
     start: "0",
-    max_results: "30",
+    max_results: String(MaxItems),
   })
   const xmlText = await myFetch<string>(`https://export.arxiv.org/api/query?${query}`, {
     responseType: "text" as any,

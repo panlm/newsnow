@@ -54,7 +54,7 @@ const MIN_CARD_CHARS = 300
 const MAX_CARD_CHARS = 8000
 const CARD_CONCURRENCY = 6
 /** Frontmatter keys worth keeping; `model-index` alone can be hundreds of YAML lines. */
-const CARD_FRONTMATTER_KEYS = /^(license|license_name|library_name|pipeline_tag|base_model|language|task_categories|size_categories|tags):/
+const CARD_FRONTMATTER_KEYS = /^(?:license|license_name|library_name|pipeline_tag|base_model|language|task_categories|size_categories|tags):/
 
 function repoTags(repo: HFRepo) {
   const tags = (repo.tags ?? [])
@@ -129,12 +129,12 @@ async function withRepoSummaries(
     const card = await fetchRepoCard(repo, kind)
     const summary = card.length >= MIN_CARD_CHARS
       ? await summarizeArticle({
-          url: item.url,
-          title: item.title,
-          text: card,
-          variant: "repo",
-          version: repo.lastModified,
-        })
+        url: item.url,
+        title: item.title,
+        text: card,
+        variant: "repo",
+        version: repo.lastModified,
+      })
       : undefined
     if (summary) return { ...item, extra: { ...item.extra, hover: summary } }
 
@@ -148,7 +148,7 @@ async function withRepoSummaries(
 }
 
 const papers = defineSource(async () => {
-  const data = await myFetch<HFDailyPaper[]>("https://huggingface.co/api/daily_papers?limit=30", requestOptions)
+  const data = await myFetch<HFDailyPaper[]>(`https://huggingface.co/api/daily_papers?limit=${MaxItems}`, requestOptions)
   const items = data.map<NewsItem>((entry) => {
     const paper = entry.paper
     const authorCount = paper.authors?.length ?? 0

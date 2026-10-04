@@ -53,7 +53,7 @@ export default defineSource(async () => {
   if (!all.length) throw new Error("Instagram returned no posts")
   all.sort((a, b) => (b.node.taken_at_timestamp ?? 0) - (a.node.taken_at_timestamp ?? 0))
 
-  const items = all.slice(0, 30).map<NewsItem>(({ node, account }) => {
+  const items = all.slice(0, MaxItems).map<NewsItem>(({ node, account }) => {
     const cap = caption(node)
     const title = cap ? cap.slice(0, 100) : `@${account}`
     return {

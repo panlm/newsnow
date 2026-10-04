@@ -391,6 +391,14 @@
     "interval": 1800000,
     "title": "全分类"
   },
+  "awsblog-china": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/cn/blogs/china/",
+    "color": "orange",
+    "interval": 1800000,
+    "title": "中国区"
+  },
   "awsblog-compute": {
     "name": "AWS Blog",
     "column": "tech",

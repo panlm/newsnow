@@ -320,6 +320,7 @@ export const originSources = {
     // first sub, so the old全分类 bookmark keeps resolving.
     sub: {
       all: { title: "全分类" },
+      china: { title: "中国区", home: "https://aws.amazon.com/cn/blogs/china/" },
       compute: { title: "计算" },
       ai: { title: "机器学习与 AI" },
       security: { title: "安全与合规" },

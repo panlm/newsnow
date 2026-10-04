@@ -43,7 +43,7 @@ export function defineBilingualRSSSource(url: string, option?: SourceOption): So
   return async () => {
     const data = await rss2json(url)
     if (!data?.items.length) throw new Error("Cannot fetch rss data")
-    const items = data.items.slice(0, 30).map(item => ({
+    const items = data.items.slice(0, MaxItems).map(item => ({
       title: item.title,
       url: item.link,
       id: item.link,

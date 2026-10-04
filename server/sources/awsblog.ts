@@ -14,8 +14,9 @@ interface AwsBlogItem {
 
 // The directory search API returns every blog channel at once (machine-learning,
 // containers, networking, security, ...), unlike the per-channel RSS feeds.
+// `item.locale=zh_CN` returns the AWS China blog (aws.amazon.com/cn/blogs/china/).
 const endpoint = "https://aws.amazon.com/api/dirs/items/search"
-const baseQuery = "item.directoryId=blog-posts&sort_by=item.additionalFields.createdDate&sort_order=desc&size=30&item.locale=en_US"
+const baseQuery = `item.directoryId=blog-posts&sort_by=item.additionalFields.createdDate&sort_order=desc&size=${MaxItems}`
 
 /**
  * Posts carry two category axes. `blog-posts#category` mixes real topics with
@@ -24,10 +25,11 @@ const baseQuery = "item.directoryId=blog-posts&sort_by=item.additionalFields.cre
  */
 const TECH_CATEGORY_NAMESPACE = "GLOBAL#tech-category"
 
-function feed(category?: string) {
+function feed(category?: string, locale: "en_US" | "zh_CN" = "en_US") {
+  const query = `${baseQuery}&item.locale=${locale}`
   const url = category
-    ? `${endpoint}?${baseQuery}&tags.id=${encodeURIComponent(`${TECH_CATEGORY_NAMESPACE}#${category}`)}`
-    : `${endpoint}?${baseQuery}`
+    ? `${endpoint}?${query}&tags.id=${encodeURIComponent(`${TECH_CATEGORY_NAMESPACE}#${category}`)}`
+    : `${endpoint}?${query}`
 
   return defineSource(async () => {
     const res = await myFetch<{ items?: AwsBlogItem[] }>(url, { responseType: "json" })
@@ -46,12 +48,14 @@ function feed(category?: string) {
         }
       })
       .filter((item): item is NewsItem => !!item)
-    return withTranslatedHover(items)
+    // China blog excerpts are already Chinese.
+    return locale === "en_US" ? withTranslatedHover(items) : items
   })
 }
 
 export default defineSource({
   "awsblog-all": feed(),
+  "awsblog-china": feed(undefined, "zh_CN"),
   "awsblog-compute": feed("compute"),
   "awsblog-ai": feed("ai-ml"),
   "awsblog-security": feed("security-identity-compliance"),
