@@ -1,5 +1,5 @@
 import process from "node:process"
-import { AwsBlogMaxItems, Interval } from "./consts"
+import { Interval, RecentMaxItems } from "./consts"
 import { typeSafeObjectFromEntries } from "./type.util"
 import type { OriginSource, Source, SourceID } from "./types"
 
@@ -316,7 +316,7 @@ export const originSources = {
     column: "tech",
     interval: Time.Common,
     // Kept by date, not count (see server/sources/awsblog.ts); this only caps it.
-    maxItems: AwsBlogMaxItems,
+    maxItems: RecentMaxItems,
     home: "https://aws.amazon.com/blogs/",
     // `all` must stay first: genSources points the bare `awsblog` id at the
     // first sub, so the old全分类 bookmark keeps resolving.
@@ -380,11 +380,49 @@ export const originSources = {
   },
   "anthropic": {
     name: "Anthropic",
-    title: "News",
     color: "amber",
     column: "tech",
     interval: Time.Common,
     home: "https://www.anthropic.com/news",
+    // `news` must stay first: the bare `anthropic` id predates the subs and
+    // genSources points it at the first one.
+    sub: {
+      news: { title: "News" },
+      engineering: { title: "Engineering", home: "https://www.anthropic.com/engineering" },
+      research: { title: "Research", home: "https://www.anthropic.com/research" },
+    },
+  },
+  "googleai": {
+    name: "Google AI",
+    color: "blue",
+    column: "tech",
+    interval: Time.Common,
+    home: "https://blog.google/technology/ai/",
+    sub: {
+      news: { title: "News" },
+      research: { title: "Research", home: "https://research.google/blog/" },
+    },
+  },
+  "metaai": {
+    name: "Meta AI",
+    color: "indigo",
+    column: "tech",
+    interval: Time.Slow,
+    home: "https://ai.meta.com/blog/",
+    sub: {
+      blog: { title: "Blog" },
+      news: { title: "Newsroom", home: "https://about.fb.com/news/tag/ai/" },
+    },
+  },
+  "hnblogs": {
+    name: "HN 热门博客",
+    title: "2025",
+    color: "orange",
+    column: "tech",
+    interval: Time.Slow,
+    // Kept by date, not count (see server/sources/hnblogs); this only caps it.
+    maxItems: RecentMaxItems,
+    home: "https://refactoringenglish.com/tools/hn-popularity/",
   },
   "hackernews": {
     name: "Hacker News",

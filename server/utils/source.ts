@@ -1,6 +1,7 @@
 import type { AllSourceID } from "@shared/types"
 import defu from "defu"
-import { withBilingualHover } from "#/utils/translate"
+import { parseFeed } from "#/utils/feed"
+import { withBilingualHover, withTranslatedHover } from "#/utils/translate"
 import type { RSSHubOption, RSSHubInfo as RSSHubResponse, SourceGetter, SourceOption } from "#/types"
 
 type R = Partial<Record<AllSourceID, SourceGetter>>
@@ -53,6 +54,27 @@ export function defineBilingualRSSSource(url: string, option?: SourceOption): So
       },
     }))
     return withBilingualHover(items)
+  }
+}
+
+/**
+ * RSS/Atom source for English blogs outside 国际版: the post excerpt becomes a
+ * Chinese hover, as for the AWS blog.
+ */
+export function defineTranslatedFeedSource(url: string): SourceGetter {
+  return async () => {
+    const xml = await myFetch(url, { responseType: "text" })
+    const items = parseFeed(xml as string).slice(0, MaxItems).map(entry => ({
+      id: entry.url,
+      title: entry.title,
+      url: entry.url,
+      pubDate: entry.pubDate,
+      extra: {
+        hover: entry.summary,
+      },
+    }))
+    if (!items.length) throw new Error("Cannot fetch feed data")
+    return withTranslatedHover(items)
   }
 }
 

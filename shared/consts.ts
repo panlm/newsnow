@@ -13,13 +13,13 @@ export const Interval = 10 * 60 * 1000
  */
 export const MaxItems = 100
 /**
- * AWS Blog 按时间保留：最近 AwsBlogDays 天的文章全部保留，不足 MaxItems 时补到 MaxItems
+ * 按时间保留的源（AWS Blog、HN 热门博客）：最近 RecentDays 天的文章全部保留，不足 MaxItems 时补到 MaxItems
  */
-export const AwsBlogDays = 8
+export const RecentDays = 8
 /**
- * AWS Blog 的条数上限，只防极端情况（历史上最密的 8 天是 239 篇，2025 re:Invent 前一周）
+ * 按时间保留的源的条数上限，只防极端情况（AWS Blog 历史上最密的 8 天是 239 篇，2025 re:Invent 前一周）
  */
-export const AwsBlogMaxItems = 500
+export const RecentMaxItems = 500
 
 export const Homepage = packageJSON.homepage
 

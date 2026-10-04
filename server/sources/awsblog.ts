@@ -30,16 +30,16 @@ const DAY = 24 * 60 * 60 * 1000
 const TECH_CATEGORY_NAMESPACE = "GLOBAL#tech-category"
 
 /**
- * Keep every post of the last `AwsBlogDays` days, topped up to `MaxItems` when the
+ * Keep every post of the last `RecentDays` days, topped up to `MaxItems` when the
  * window holds fewer: awsblog-all publishes ~120 posts in 8 days, but the China blog
  * and most categories only a handful (some none), so a strict window would empty
  * their cards. Pages are fetched newest first until one reaches past the window.
  */
 async function fetchPosts(url: string) {
-  const since = Date.now() - AwsBlogDays * DAY
+  const since = Date.now() - RecentDays * DAY
   const items = new Map<string, NewsItem>()
   let inWindow = 0
-  for (let page = 0; items.size < AwsBlogMaxItems; page++) {
+  for (let page = 0; items.size < RecentMaxItems; page++) {
     const res = await myFetch<{ items?: AwsBlogItem[] }>(`${url}&page=${page}`, { responseType: "json" })
     const batch = (res?.items ?? []).map(entry => entry?.item?.additionalFields)
     for (const fields of batch) {
@@ -59,7 +59,7 @@ async function fetchPosts(url: string) {
     const oldest = batch.at(-1)?.createdDate
     if (batch.length < MaxItems || !oldest || Date.parse(oldest) < since) break
   }
-  return [...items.values()].slice(0, Math.min(Math.max(inWindow, MaxItems), AwsBlogMaxItems))
+  return [...items.values()].slice(0, Math.min(Math.max(inWindow, MaxItems), RecentMaxItems))
 }
 
 function feed(category?: string, locale: "en_US" | "zh_CN" | "ja_JP" | "ko_KR" = "en_US") {

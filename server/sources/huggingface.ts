@@ -101,18 +101,6 @@ async function fetchRepoCard(repo: HFRepo, kind: "models" | "datasets") {
   }
 }
 
-async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>) {
-  const result = Array.from({ length: items.length }) as R[]
-  let cursor = 0
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor++
-      result[index] = await fn(items[index], index)
-    }
-  }))
-  return result
-}
-
 /**
  * Model and dataset listings carry no description at all, so the hover used to be
  * the raw tag list — which Amazon Translate then mangled ("safetensors" became

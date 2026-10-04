@@ -629,12 +629,96 @@
     "title": "热门数据集"
   },
   "anthropic": {
-    "title": "News",
+    "redirect": "anthropic-news",
     "name": "Anthropic",
     "column": "tech",
     "home": "https://www.anthropic.com/news",
     "color": "amber",
-    "interval": 1800000
+    "interval": 1800000,
+    "title": "News"
+  },
+  "anthropic-news": {
+    "name": "Anthropic",
+    "column": "tech",
+    "home": "https://www.anthropic.com/news",
+    "color": "amber",
+    "interval": 1800000,
+    "title": "News"
+  },
+  "anthropic-engineering": {
+    "name": "Anthropic",
+    "column": "tech",
+    "home": "https://www.anthropic.com/engineering",
+    "color": "amber",
+    "interval": 1800000,
+    "title": "Engineering"
+  },
+  "anthropic-research": {
+    "name": "Anthropic",
+    "column": "tech",
+    "home": "https://www.anthropic.com/research",
+    "color": "amber",
+    "interval": 1800000,
+    "title": "Research"
+  },
+  "googleai": {
+    "redirect": "googleai-news",
+    "name": "Google AI",
+    "column": "tech",
+    "home": "https://blog.google/technology/ai/",
+    "color": "blue",
+    "interval": 1800000,
+    "title": "News"
+  },
+  "googleai-news": {
+    "name": "Google AI",
+    "column": "tech",
+    "home": "https://blog.google/technology/ai/",
+    "color": "blue",
+    "interval": 1800000,
+    "title": "News"
+  },
+  "googleai-research": {
+    "name": "Google AI",
+    "column": "tech",
+    "home": "https://research.google/blog/",
+    "color": "blue",
+    "interval": 1800000,
+    "title": "Research"
+  },
+  "metaai": {
+    "redirect": "metaai-blog",
+    "name": "Meta AI",
+    "column": "tech",
+    "home": "https://ai.meta.com/blog/",
+    "color": "indigo",
+    "interval": 3600000,
+    "title": "Blog"
+  },
+  "metaai-blog": {
+    "name": "Meta AI",
+    "column": "tech",
+    "home": "https://ai.meta.com/blog/",
+    "color": "indigo",
+    "interval": 3600000,
+    "title": "Blog"
+  },
+  "metaai-news": {
+    "name": "Meta AI",
+    "column": "tech",
+    "home": "https://about.fb.com/news/tag/ai/",
+    "color": "indigo",
+    "interval": 3600000,
+    "title": "Newsroom"
+  },
+  "hnblogs": {
+    "title": "2025",
+    "name": "HN 热门博客",
+    "column": "tech",
+    "home": "https://refactoringenglish.com/tools/hn-popularity/",
+    "color": "orange",
+    "interval": 3600000,
+    "maxItems": 500
   },
   "hackernews": {
     "name": "Hacker News",
