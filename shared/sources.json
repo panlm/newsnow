@@ -582,6 +582,114 @@
     "maxItems": 500,
     "title": "区块链"
   },
+  "awsblog-architecture": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "架构"
+  },
+  "awsblog-cfm": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "云财务管理"
+  },
+  "awsblog-euc": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "终端用户计算"
+  },
+  "awsblog-hpc": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "高性能计算"
+  },
+  "awsblog-serverless": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "无服务器"
+  },
+  "awsblog-containers": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "容器"
+  },
+  "awsblog-devops": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "DevOps"
+  },
+  "awsblog-messaging": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "消息与联络中心"
+  },
+  "awsblog-opensource": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "开源"
+  },
+  "awsblog-strategy": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "企业战略"
+  },
+  "awsblog-sustainability": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "可持续发展"
+  },
+  "awsblog-supplychain": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/blogs/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "供应链"
+  },
   "arxiv": {
     "title": "AI 最新论文",
     "name": "arXiv",
