@@ -420,6 +420,15 @@
     "maxItems": 500,
     "title": "韩国"
   },
+  "awsblog-whatsnew": {
+    "name": "AWS Blog",
+    "column": "tech",
+    "home": "https://aws.amazon.com/new/",
+    "color": "orange",
+    "interval": 1800000,
+    "maxItems": 500,
+    "title": "What's New"
+  },
   "awsblog-machine-learning": {
     "name": "AWS Blog",
     "column": "tech",

@@ -325,6 +325,8 @@ export const originSources = {
       "china": { title: "中国", home: "https://aws.amazon.com/cn/blogs/china/" },
       "japan": { title: "日本", home: "https://aws.amazon.com/jp/blogs/news/" },
       "korea": { title: "韩国", home: "https://aws.amazon.com/ko/blogs/" },
+      // AWS What's New announcements, not a blog: most launches get no blog post.
+      "whatsnew": { title: "What's New", home: "https://aws.amazon.com/new/" },
       // One block per blog channel or group of channels, keyed by its largest
       // channel; the groups live in server/utils/awsblog-index.ts.
       "machine-learning": { title: "人工智能", home: "https://aws.amazon.com/blogs/machine-learning/" },
