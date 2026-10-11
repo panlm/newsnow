@@ -7,7 +7,9 @@ import type { Database } from "db0"
 
 const DEFAULT_MODEL_ID = "jp.anthropic.claude-haiku-4-5-20251001-v1:0"
 const SUMMARY_TIMEOUT_MS = 25000
-const MAX_CONCURRENCY = 3
+// Shared by Hacker News and Hugging Face. At 3, a cold Hacker News refresh with 20+
+// new stories took ~30s and outran the client's fetch timeout.
+const MAX_CONCURRENCY = 12
 const MAX_MEMORY_CACHE_ITEMS = 2000
 const MAX_OUTPUT_TOKENS = 500
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000
@@ -156,8 +158,8 @@ async function withSummarySlot<T>(fn: () => Promise<T>): Promise<T> {
 
 function cleanSummary(text: string) {
   const compact = text
-    .replace(/```[a-z]*\n?|```/gi, "")
-    .replace(/^\s*(摘要|总结)\s*[:：]\s*/i, "")
+    .replace(/```[a-z]*\n?/gi, "")
+    .replace(/^\s*(摘要|总结)\s*[:：]\s*/, "")
     .replace(/\s+/g, " ")
     .replace(/^["'“”「」]+|["'“”「」]+$/g, "")
     .trim()

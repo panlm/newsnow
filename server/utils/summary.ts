@@ -12,6 +12,7 @@ import { summarizeArticle } from "#/utils/llm"
 const MAX_RESPONSE_BYTES = 512 * 1024
 const PAGE_TIMEOUT_MS = 8000
 const MAX_REDIRECTS = 3
+const MAX_PAGE_CONCURRENCY = 12
 const ARTICLE_USER_AGENT
   = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
 const MIN_ARTICLE_CHARS = 400
@@ -259,6 +260,10 @@ async function addPageDescription(item: NewsItem, options: PageDescriptionOption
   }
 }
 
+function pageFetchConcurrency(options: PageDescriptionOptions) {
+  return Math.max(1, Math.min(options.concurrency ?? 4, MAX_PAGE_CONCURRENCY))
+}
+
 /**
  * Add article metadata descriptions without failing the source when a publisher
  * is unavailable. Requests are bounded and pinned to prevalidated public IPs.
@@ -267,7 +272,7 @@ export async function withPageDescriptions(
   items: NewsItem[],
   options: PageDescriptionOptions = {},
 ): Promise<NewsItem[]> {
-  const concurrency = Math.max(1, Math.min(options.concurrency ?? 4, 8))
+  const concurrency = pageFetchConcurrency(options)
   const maxFetches = Math.max(0, options.maxFetches ?? 20)
   const result = [...items]
   const candidates = items
@@ -287,5 +292,6 @@ export async function withPageDescriptions(
 
 export const __summaryInternals = {
   isPublicAddress,
+  pageFetchConcurrency,
   resolvePublicTarget,
 }

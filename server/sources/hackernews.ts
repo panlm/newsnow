@@ -19,7 +19,7 @@ async function withHackerNewsDescriptions(entries: { item: NewsItem, summaryUrl:
   const enriched = await withPageDescriptions(entries.map(({ item, summaryUrl }) => ({
     ...item,
     url: summaryUrl,
-  })), { maxFetches: 30, concurrency: 6, llm: true })
+  })), { maxFetches: 30, concurrency: 12, llm: true })
 
   return enriched.map((item, index) => {
     const original = entries[index].item
